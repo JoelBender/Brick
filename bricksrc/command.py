@@ -2,7 +2,7 @@ from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
 from rdflib.collection import Collection
 from rdflib.extras.infixowl import Restriction
 
-from namespaces import *
+from .namespaces import *
 
 
 command_definitions = {
@@ -118,10 +118,9 @@ command_definitions = {
             },
             "On_Off_Command": {
                 "tags": [TAG.OnOff, TAG.Command],
-                OWL.equivalentClass: BRICK.Start_Stop_Command,
                 "subclasses": {
                     "Steam_On_Off_Command": {},
-                    "Booster_Fan_Start_Stop_Command": {},
+                    "Start_Stop_Command": {},
                 },
             },
             "Override_Command": {

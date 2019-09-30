@@ -2,7 +2,7 @@ from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
 from rdflib.collection import Collection
 from rdflib.extras.infixowl import Restriction
 
-from namespaces import *
+from .namespaces import *
 
 
 """
@@ -99,18 +99,21 @@ properties = {
         SKOS.definition: Literal("The subject has the given tag"),
         RDFS.range: BRICK.Tag,
     },
+    "isTagOf": {
+        A: [OWL.AsymmetricProperty, OWL.IrreflexiveProperty],
+        RDFS.domain: BRICK.Tag,
+    },
 
     "measures": {
         A: [OWL.AsymmetricProperty, OWL.IrreflexiveProperty],
         OWL.inverseOf: "isMeasuredBy",
         SKOS.definition: Literal("The subject measures a quantity or substance given by the object"),
         RDFS.domain: BRICK.Point,
-        # TODO: make a union class 'measurable' that is both quantities and substances
-        RDFS.range: BRICK.Substance,
+        RDFS.range: BRICK.Measurable,
     },
     "isMeasuredBy": {
         A: [OWL.AsymmetricProperty, OWL.IrreflexiveProperty],
-        RDFS.domain: BRICK.Substance,
+        RDFS.domain: BRICK.Measurable,
         RDFS.range: BRICK.Point,
     },
     "regulates": {
