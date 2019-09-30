@@ -24,6 +24,12 @@ If you have an issue with Brick's coverage, utility or usability, or any other B
    to check if anyone has asked your question already.
 2. If you find a previously submitted issue that closely mirrors your own, feel free to jump in on the conversation. Otherwise, please file a new issue or submit a new thread on the forum.
 
+## Examples
+
+The `examples/` directory contains executable code samples with extensive documentation that introduce Brick concepts and idioms.
+
+- `simple_example_1.py`: getting familiar with RDFlib, namespaces, Brick models and when and when not to import the Brick ontology definition
+
 ## How To Contribute
 
 See [CONTRIBUTING.md](https://github.com/BrickSchema/Brick/blob/master/CONTRIBUTING.md)
@@ -140,7 +146,7 @@ This means that a temperature sensor `:ts1` could be defined in two different wa
 
 ### Substances
 
-Brick now defines a hierarchy of substances (`substances.py`) and a hierarchy of quantities (`quantities.py`).
+Brick now defines a hierarchy of substances (`bricksrc/substances.py`) and a hierarchy of quantities (`bricksrc/quantities.py`).
 Substances and quantities can be related to equipment and points.
 
 Not all of this is implemented. In the current prototype, sensors are related to substances and quantities
@@ -219,4 +225,4 @@ definitions = {
 define_subclasses(definitions, BRICK.Equipment)
 ```
 
-For now, the code is the documentation. Look at `equipment.py`, `point.py`, etc for examples and how to add to each of the class hierarchies.
+For now, the code is the documentation. Look at `bricksrc/equipment.py`, `bricksrc/point.py`, etc. for examples and how to add to each of the class hierarchies.
