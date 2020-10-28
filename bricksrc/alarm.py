@@ -1,4 +1,4 @@
-from .namespaces import TAG, BRICK
+from .namespaces import BRICK, TAG, OWL
 
 alarm_definitions = {
     "Alarm": {
@@ -40,16 +40,6 @@ alarm_definitions = {
                     "Emergency_Generator_Alarm": {
                         "tags": [TAG.Point, TAG.Generator, TAG.Emergency, TAG.Alarm],
                     },
-                    "Emergency_Power_Loss_Alarm": {
-                        "tags": [
-                            TAG.Point,
-                            TAG.Power,
-                            TAG.Loss,
-                            TAG.Emergency,
-                            TAG.Alarm,
-                        ],
-                        "parents": [BRICK.Power_Loss_Alarm],
-                    },
                 },
             },
             "Failure_Alarm": {
@@ -79,8 +69,8 @@ alarm_definitions = {
                     },
                 },
             },
-            "Liquid_Detected_Alarm": {
-                "tags": [TAG.Point, TAG.Liquid, TAG.Detected, TAG.Alarm],
+            "Liquid_Detection_Alarm": {
+                "tags": [TAG.Point, TAG.Liquid, TAG.Detection, TAG.Alarm],
             },
             "Luminance_Alarm": {"tags": [TAG.Point, TAG.Luminance, TAG.Alarm]},
             "Maintenance_Required_Alarm": {
@@ -141,6 +131,9 @@ alarm_definitions = {
                                 ],
                             },
                             "Supply_Water_Temperature_Alarm": {
+                                OWL.equivalentClass: BRICK[
+                                    "Discharge_Water_Temperature_Alarm"
+                                ],
                                 "tags": [
                                     TAG.Point,
                                     TAG.Supply,
@@ -178,6 +171,9 @@ alarm_definitions = {
                                 },
                             },
                             "Supply_Air_Temperature_Alarm": {
+                                OWL.equivalentClass: BRICK[
+                                    "Discharge_Air_Temperature_Alarm"
+                                ],
                                 "tags": [
                                     TAG.Point,
                                     TAG.Supply,
@@ -226,16 +222,16 @@ alarm_definitions = {
             "Smoke_Alarm": {
                 "tags": [TAG.Point, TAG.Smoke, TAG.Alarm],
                 "subclasses": {
-                    "Smoke_Detected_Alarm": {
-                        "tags": [TAG.Point, TAG.Smoke, TAG.Detected, TAG.Alarm],
+                    "Smoke_Detection_Alarm": {
+                        "tags": [TAG.Point, TAG.Smoke, TAG.Detection, TAG.Alarm],
                         "subclasses": {
-                            "Discharge_Air_Smoke_Detected_Alarm": {
+                            "Discharge_Air_Smoke_Detection_Alarm": {
                                 "tags": [
                                     TAG.Point,
                                     TAG.Discharge,
                                     TAG.Air,
                                     TAG.Smoke,
-                                    TAG.Detected,
+                                    TAG.Detection,
                                     TAG.Alarm,
                                 ],
                                 "parents": [BRICK.Air_Alarm],
