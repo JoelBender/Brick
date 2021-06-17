@@ -583,7 +583,137 @@ setpoint_definitions = {
                                 ],
                             },
                         },
-                    }
+                    },
+                    "Water_Flow_Setpoint": {
+                        "tags": [
+                            TAG.Point,
+                            TAG.Water,
+                            TAG.Flow,
+                            TAG.Setpoint,
+                        ],
+                        "subclasses": {
+                            "Supply_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Supply,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                                OWL.equivalentClass: BRICK[
+                                    "Discharge_Water_Flow_Setpoint"
+                                ],
+                                "subclasses": {
+                                    "Chilled_Water_Supply_Flow_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Chilled,
+                                            TAG.Water,
+                                            TAG.Supply,
+                                            TAG.Flow,
+                                            TAG.Setpoint,
+                                        ],
+                                        OWL.equivalentClass: BRICK[
+                                            "Chilled_Water_Discharge_Flow_Setpoint"
+                                        ],
+                                        "parents": [BRICK.Chilled_Water_Flow_Setpoint],
+                                    },
+                                    "Hot_Water_Supply_Flow_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Hot,
+                                            TAG.Water,
+                                            TAG.Supply,
+                                            TAG.Flow,
+                                            TAG.Setpoint,
+                                        ],
+                                        OWL.equivalentClass: BRICK[
+                                            "Hot_Water_Discharge_Flow_Setpoint"
+                                        ],
+                                        "parents": [BRICK.Hot_Water_Flow_Setpoint],
+                                    },
+                                },
+                            },
+                            "Discharge_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Discharge,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                                "subclasses": {
+                                    "Chilled_Water_Discharge_Flow_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Chilled,
+                                            TAG.Water,
+                                            TAG.Discharge,
+                                            TAG.Flow,
+                                            TAG.Setpoint,
+                                        ],
+                                        "parents": [BRICK.Chilled_Water_Flow_Setpoint],
+                                    },
+                                    "Hot_Water_Discharge_Flow_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Hot,
+                                            TAG.Water,
+                                            TAG.Discharge,
+                                            TAG.Flow,
+                                            TAG.Setpoint,
+                                        ],
+                                        "parents": [BRICK.Hot_Water_Flow_Setpoint],
+                                    },
+                                },
+                            },
+                            "Entering_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Entering,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                            },
+                            "Leaving_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Leaving,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                            },
+                            "Hot_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Hot,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                            },
+                            "Chilled_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Chilled,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                            },
+                            "Bypass_Water_Flow_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Bypass,
+                                    TAG.Water,
+                                    TAG.Flow,
+                                    TAG.Setpoint,
+                                ],
+                            },
+                        },
+                    },
                 },
             },
             "Humidity_Setpoint": {
@@ -1164,6 +1294,48 @@ setpoint_definitions = {
                                     TAG.Setpoint,
                                 ],
                                 "subclasses": {
+                                    "Effective_Discharge_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Discharge,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Effective,
+                                        ],
+                                        "parents": [
+                                            BRICK.Effective_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Occupied_Discharge_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Discharge,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Occupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Occupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Unoccupied_Discharge_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Discharge,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Unoccupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Unoccupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
                                     "Discharge_Air_Temperature_Heating_Setpoint": {
                                         "parents": [BRICK.Heating_Temperature_Setpoint],
                                         "tags": [
@@ -1230,6 +1402,68 @@ setpoint_definitions = {
                                     TAG.Setpoint,
                                 ],
                             },
+                            "Occupied_Air_Temperature_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Occupied,
+                                    TAG.Air,
+                                    TAG.Temperature,
+                                    TAG.Setpoint,
+                                ],
+                            },
+                            "Return_Air_Temperature_Setpoint": {
+                                "tags": [
+                                    TAG.Point,
+                                    TAG.Return,
+                                    TAG.Air,
+                                    TAG.Temperature,
+                                    TAG.Setpoint,
+                                ],
+                                "subclasses": {
+                                    "Effective_Return_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Return,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Effective,
+                                        ],
+                                        "parents": [
+                                            BRICK.Effective_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Occupied_Return_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Return,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Occupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Occupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Unoccupied_Return_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Return,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Unoccupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Unoccupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                },
+                            },
                             "Room_Air_Temperature_Setpoint": {
                                 "tags": [
                                     TAG.Point,
@@ -1238,6 +1472,50 @@ setpoint_definitions = {
                                     TAG.Temperature,
                                     TAG.Setpoint,
                                 ],
+                                "subclasses": {
+                                    "Effective_Room_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Room,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Effective,
+                                        ],
+                                        "parents": [
+                                            BRICK.Effective_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Occupied_Room_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Room,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Occupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Occupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Unoccupied_Room_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Room,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Unoccupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Unoccupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                },
                             },
                             "Zone_Air_Temperature_Setpoint": {
                                 "tags": [
@@ -1247,6 +1525,72 @@ setpoint_definitions = {
                                     TAG.Temperature,
                                     TAG.Setpoint,
                                 ],
+                                "subclasses": {
+                                    "Effective_Zone_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Zone,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Effective,
+                                        ],
+                                        "parents": [
+                                            BRICK.Effective_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Occupied_Zone_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Zone,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Occupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Occupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Unoccupied_Zone_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Zone,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Unoccupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Unoccupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Zone_Air_Cooling_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Zone,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Setpoint,
+                                            TAG.Cooling,
+                                        ],
+                                        "parents": [BRICK.Cooling_Temperature_Setpoint],
+                                    },
+                                    "Zone_Air_Heating_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Zone,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Setpoint,
+                                            TAG.Heating,
+                                        ],
+                                        "parents": [BRICK.Heating_Temperature_Setpoint],
+                                    },
+                                },
                             },
                             "Outside_Air_Temperature_Setpoint": {
                                 "subclasses": {
@@ -1360,6 +1704,50 @@ setpoint_definitions = {
                                     TAG.Temperature,
                                     TAG.Setpoint,
                                 ],
+                                "subclasses": {
+                                    "Effective_Supply_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Supply,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Effective,
+                                        ],
+                                        "parents": [
+                                            BRICK.Effective_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Occupied_Supply_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Supply,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Occupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Occupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                    "Unoccupied_Supply_Air_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Supply,
+                                            TAG.Air,
+                                            TAG.Temperature,
+                                            TAG.Heat,
+                                            TAG.Setpoint,
+                                            TAG.Unoccupied,
+                                        ],
+                                        "parents": [
+                                            BRICK.Unoccupied_Air_Temperature_Setpoint
+                                        ],
+                                    },
+                                },
                             },
                             "Min_Air_Temperature_Setpoint": {
                                 "tags": [
@@ -1469,6 +1857,16 @@ setpoint_definitions = {
                                             TAG.Temperature,
                                             TAG.Setpoint,
                                             TAG.Chilled,
+                                        ],
+                                    },
+                                    "Supply_Condenser_Water_Temperature_Setpoint": {
+                                        "tags": [
+                                            TAG.Point,
+                                            TAG.Supply,
+                                            TAG.Water,
+                                            TAG.Temperature,
+                                            TAG.Setpoint,
+                                            TAG.Condenser,
                                         ],
                                     },
                                 },
