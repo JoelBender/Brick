@@ -1,5 +1,4 @@
 from brickschema.graph import Graph
-from brickschema.inference import BrickInferenceSession
 from rdflib import Literal, URIRef
 from .namespaces import SKOS, OWL, RDFS, BRICK, QUDTQK, QUDTDV, QUDT, UNIT
 
@@ -7,26 +6,25 @@ from .namespaces import SKOS, OWL, RDFS, BRICK, QUDTQK, QUDTDV, QUDT, UNIT
 g = Graph()
 g.load_file("support/VOCAB_QUDT-QUANTITY-KINDS-ALL-v2.1.ttl")
 g.load_file("support/VOCAB_QUDT-UNITS-ALL-v2.1.ttl")
-g.g.bind("qudt", QUDT)
-g.g.bind("qudtqk", QUDTQK)
-sess = BrickInferenceSession()
-g = sess.expand(g)
+g.bind("qudt", QUDT)
+g.bind("qudtqk", QUDTQK)
+g.expand(profile="brick")
 
 
-def get_units(brick_quantity):
+def get_units(qudt_quantity):
     """
     Fetches the QUDT unit and symbol (as a Literal) from the QUDT ontology so
     in order to avoid having to pull the full QUDT ontology into Brick
     """
-    res = g.query(
+    return g.query(
         f"""SELECT ?unit ?symbol WHERE {{
-                    <{brick_quantity}> qudt:applicableUnit ?unit .
-                    ?unit qudt:symbol ?symbol .
-                    FILTER(isLiteral(?symbol))
+                    <{qudt_quantity}> qudt:applicableUnit ?unit .
+                    OPTIONAL {{
+                        ?unit qudt:symbol ?symbol .
+                        FILTER(isLiteral(?symbol))
+                    }}
                     }}"""
     )
-    for r in res:
-        yield r
 
 
 """
@@ -36,64 +34,121 @@ quantity_definitions = {
     "Air_Quality": {
         SKOS.narrower: {
             "CO_Concentration": {
-                QUDT.applicableUnit: [UNIT.PPM],
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
-                SKOS.definition: Literal("The concentration of CO in air"),
+                SKOS.definition: Literal(
+                    "The concentration of carbon monoxide in a medium"
+                ),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("COConcentration"),
-                SKOS.broader: QUDTQK.Dimensionless,
+                SKOS.broader: QUDTQK.DimensionlessRatio,
             },
             "CO2_Concentration": {
-                QUDT.applicableUnit: [UNIT.PPM],
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
-                SKOS.definition: Literal("The concentration of CO2 in air"),
+                SKOS.definition: Literal(
+                    "The concentration of carbon dioxide in a medium"
+                ),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("CO2Concentration"),
-                SKOS.broader: QUDTQK.Dimensionless,
+                SKOS.broader: QUDTQK.DimensionlessRatio,
+            },
+            "Formaldehyde_Concentration": {
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
+                QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
+                SKOS.definition: Literal(
+                    "The concentration of formaldehyde in a medium"
+                ),
+                RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                RDFS.label: Literal("FormaldehydeConcentration"),
+                SKOS.broader: QUDTQK.DimensionlessRatio,
+            },
+            "Ozone_Concentration": {
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
+                QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
+                SKOS.definition: Literal("The concentration of ozone in a medium"),
+                RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                RDFS.label: Literal("OzoneConcentration"),
+                SKOS.broader: QUDTQK.DimensionlessRatio,
+            },
+            "Methane_Concentration": {
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
+                QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
+                SKOS.definition: Literal("The concentration of methane in a medium"),
+                RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                RDFS.label: Literal("MethaneConcentration"),
+                SKOS.broader: QUDTQK.DimensionlessRatio,
+            },
+            "NO2_Concentration": {
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
+                QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
+                SKOS.definition: Literal(
+                    "The concentration of nitrogen dioxide in a medium"
+                ),
+                RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                RDFS.label: Literal("PM10Concentration"),
             },
             "PM10_Concentration": {
-                QUDT.applicableUnit: [UNIT.PPM],
-                QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB, UNIT["MicroGM-PER-M3"]],
                 SKOS.definition: Literal(
                     "The concentration of particulates with diameter of 10 microns or less in air"
                 ),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("PM10Concentration"),
-                SKOS.broader: QUDTQK.Dimensionless,
             },
-            "PM25_Concentration": {
-                QUDT.applicableUnit: [UNIT.PPM],
-                QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
+            "PM2.5_Concentration": {
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB, UNIT["MicroGM-PER-M3"]],
                 SKOS.definition: Literal(
-                    "The concentration of particulates with diameter of 25 microns or less in air"
+                    "The concentration of particulates with diameter of 2.5 microns or less in air"
                 ),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
-                RDFS.label: Literal("PM25Concentration"),
-                SKOS.broader: QUDTQK.Dimensionless,
+                RDFS.label: Literal("PM2.5Concentration"),
+            },
+            "PM1_Concentration": {
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB, UNIT["MicroGM-PER-M3"]],
+                SKOS.definition: Literal(
+                    "The concentration of particulates with diameter of 1 microns or less in air"
+                ),
+                RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                RDFS.label: Literal("PM1Concentration"),
+            },
+            "Radioactivity_Concentration": {
+                SKOS.narrower: {
+                    "Radon_Concentration": {
+                        QUDT.applicableUnit: [UNIT["BQ-PER-M3"]],
+                        QUDT.hasDimensionVector: QUDTDV["A0E0L-3I0M0H0T-1D0"],
+                        SKOS.definition: Literal(
+                            "The concentration of radioactivity due to Radon in a medium"
+                        ),
+                        RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                        RDFS.label: Literal("RadonConcentration"),
+                        SKOS.broader: QUDTQK.ActivityConcentration,
+                    },
+                },
             },
             "TVOC_Concentration": {
-                QUDT.applicableUnit: [UNIT.PPM],
+                QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB, UNIT["MicroGM-PER-M3"]],
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
                 SKOS.definition: Literal(
                     "The concentration of total volatile organic compounds in air"
                 ),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("TVOCConcentration"),
-                SKOS.broader: QUDTQK.Dimensionless,
+                SKOS.broader: QUDTQK.DimensionlessRatio,
             },
         },
     },
-    "Angle": {OWL.sameAs: QUDTQK["Angle"]},
-    "Conductivity": {OWL.sameAs: QUDTQK["Conductivity"]},
-    "Capacity": {OWL.sameAs: QUDTQK["Capacity"]},
+    "Angle": {BRICK.hasQUDTReference: QUDTQK["Angle"]},
+    "Conductivity": {BRICK.hasQUDTReference: QUDTQK["Conductivity"]},
+    "Capacity": {BRICK.hasQUDTReference: QUDTQK["Capacity"]},
     "Enthalpy": {
         SKOS.definition: Literal(
             "(also known as heat content), thermodynamic quantity equal to the sum of the internal energy of a system plus the product of the pressure volume work done on the system. H = E + pv, where H = enthalpy or total heat content, E = internal energy of the system, p = pressure, and v = volume. (Compare to [[specific enthalpy]].)"
         ),
-        OWL.sameAs: QUDTQK["Enthalpy"],
+        BRICK.hasQUDTReference: QUDTQK["Enthalpy"],
     },
     "Mass": {
-        OWL.sameAs: QUDTQK["Mass"],
+        BRICK.hasQUDTReference: QUDTQK["Mass"],
         SKOS.narrower: {
             "GrainsOfMoisture": {
                 QUDT.applicableUnit: UNIT.GRAIN,
@@ -151,20 +206,22 @@ quantity_definitions = {
         },
     },
     "Power": {
-        OWL.sameAs: QUDTQK["Power"],
+        BRICK.hasQUDTReference: QUDTQK["Power"],
         SKOS.narrower: {
             "Electric_Power": {
-                OWL.sameAs: QUDTQK["ElectricPower"],
+                BRICK.hasQUDTReference: QUDTQK["ElectricPower"],
                 SKOS.narrower: {
-                    "Apparent_Power": {OWL.sameAs: QUDTQK["ApparentPower"]},
+                    "Apparent_Power": {BRICK.hasQUDTReference: QUDTQK["ApparentPower"]},
                     "Active_Power": {
-                        OWL.sameAs: [QUDTQK["ActivePower"], BRICK["Real_Power"]],
+                        OWL.sameAs: BRICK["Real_Power"],
+                        BRICK.hasQUDTReference: QUDTQK["ActivePower"],
                     },
                     "Real_Power": {
-                        OWL.sameAs: [QUDTQK["ActivePower"], BRICK["Active_Power"]],
+                        OWL.sameAs: BRICK["Active_Power"],
+                        BRICK.hasQUDTReference: QUDTQK["ActivePower"],
                     },
-                    "Reactive_Power": {OWL.sameAs: QUDTQK["ReactivePower"]},
-                    "Complex_Power": {OWL.sameAs: QUDTQK["ComplexPower"]},
+                    "Reactive_Power": {BRICK.hasQUDTReference: QUDTQK["ReactivePower"]},
+                    "Complex_Power": {BRICK.hasQUDTReference: QUDTQK["ComplexPower"]},
                 },
             },
             "Peak_Power": {
@@ -194,7 +251,7 @@ quantity_definitions = {
     },
     "Cloudage": {
         # TODO: define Okta?
-        QUDT.applicableUnit: [UNIT.Okta],
+        # QUDT.applicableUnit: [UNIT.Okta],
         SKOS.definition: Literal(
             "The fraction of the sky obscured by clouds when observed from a particular location"
         ),
@@ -203,7 +260,7 @@ quantity_definitions = {
         SKOS.broader: QUDTQK.Dimensionless,
     },
     "Electric_Current": {
-        OWL.sameAs: QUDTQK["ElectricCurrent"],
+        BRICK.hasQUDTReference: QUDTQK["ElectricCurrent"],
         SKOS.related: {
             "Current_Angle": {
                 SKOS.definition: Literal(
@@ -234,7 +291,7 @@ quantity_definitions = {
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("CurrentImbalance"),
-                SKOS.broader: BRICK.Dimensionless,
+                SKOS.broader: QUDTQK.Dimensionless,
             },
             "Current_Total_Harmonic_Distortion": {
                 SKOS.definition: Literal(
@@ -244,10 +301,10 @@ quantity_definitions = {
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("CurrentTotalHarmonicDistortion"),
-                SKOS.broader: BRICK.Dimensionless,
+                SKOS.broader: QUDTQK.Dimensionless,
             },
             "Alternating_Current_Frequency": {
-                QUDT.applicableUnit: [QUDT.GigaHZ, QUDT.MegaHZ, QUDT.KiloHZ, QUDT.HZ],
+                QUDT.applicableUnit: [UNIT.GigaHZ, UNIT.MegaHZ, UNIT.KiloHZ, UNIT.HZ],
                 SKOS.definition: Literal(
                     "The frequency of the oscillations of alternating current"
                 ),
@@ -259,7 +316,7 @@ quantity_definitions = {
         },
     },
     "Voltage": {
-        OWL.sameAs: QUDTQK["Voltage"],
+        BRICK.hasQUDTReference: QUDTQK["Voltage"],
         SKOS.related: {
             "Voltage_Angle": {
                 SKOS.definition: Literal(
@@ -290,11 +347,11 @@ quantity_definitions = {
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("VoltageImbalance"),
-                SKOS.broader: BRICK.Dimensionless,
+                SKOS.broader: QUDTQK.Dimensionless,
             },
         },
     },
-    "Dewpoint": {OWL.sameAs: QUDTQK["DewPointTemperature"]},
+    "Dewpoint": {BRICK.hasQUDTReference: QUDTQK["DewPointTemperature"]},
     "Direction": {
         SKOS.narrower: {
             "Wind_Direction": {
@@ -352,11 +409,11 @@ quantity_definitions = {
                     },
                 },
             },
-            "Thermal_Energy": {OWL.sameAs: QUDTQK["ThermalEnergy"]},
+            "Thermal_Energy": {BRICK.hasQUDTReference: QUDTQK["ThermalEnergy"]},
         },
     },
     "Flow": {
-        OWL.sameAs: QUDTQK["VolumeFlowRate"],
+        BRICK.hasQUDTReference: QUDTQK["VolumeFlowRate"],
         SKOS.narrower: {
             "Flow_Loss": {
                 QUDT.applicableUnit: [UNIT["M3-PER-SEC"]],
@@ -371,22 +428,22 @@ quantity_definitions = {
         },
     },
     "Frequency": {
-        OWL.sameAs: QUDTQK["Frequency"],
+        BRICK.hasQUDTReference: QUDTQK["Frequency"],
         SKOS.narrower: {"Alternating_Current_Frequency": {}},
     },
     "Humidity": {
         SKOS.narrower: {
-            "Relative_Humidity": {OWL.sameAs: QUDTQK["RelativeHumidity"]},
-            "Absolute_Humidity": {OWL.sameAs: QUDTQK["AbsoluteHumidity"]},
+            "Relative_Humidity": {BRICK.hasQUDTReference: QUDTQK["RelativeHumidity"]},
+            "Absolute_Humidity": {BRICK.hasQUDTReference: QUDTQK["AbsoluteHumidity"]},
         }
     },
-    "Illuminance": {OWL.sameAs: QUDTQK["Illuminance"]},
+    "Illuminance": {BRICK.hasQUDTReference: QUDTQK["Illuminance"]},
     "Irradiance": {
         QUDT.applicableUnit: [
             UNIT["W-PER-M2"],
             UNIT["W-PER-IN2"],
             UNIT["W-PER-FT2"],
-            UNIT["W-PER-CeniM2"],
+            UNIT["W-PER-CentiM2"],
         ],
         SKOS.definition: Literal(
             "The power per unit area of electromagnetic radiation incident on a surface"
@@ -400,7 +457,7 @@ quantity_definitions = {
                     UNIT["W-PER-M2"],
                     UNIT["W-PER-IN2"],
                     UNIT["W-PER-FT2"],
-                    UNIT["W-PER-CeniM2"],
+                    UNIT["W-PER-CentiM2"],
                 ],
                 SKOS.definition: Literal(
                     "The power per unit area of solar electromagnetic radiation incident on a surface"
@@ -454,16 +511,16 @@ quantity_definitions = {
         },
     },
     "Luminance": {
-        OWL.sameAs: QUDTQK["Luminance"],
+        BRICK.hasQUDTReference: QUDTQK["Luminance"],
         SKOS.narrower: {
-            "Luminous_Flux": {OWL.sameAs: QUDTQK["LuminousFlux"]},
-            "Luminous_Intensity": {OWL.sameAs: QUDTQK["LuminousIntensity"]},
+            "Luminous_Flux": {BRICK.hasQUDTReference: QUDTQK["LuminousFlux"]},
+            "Luminous_Intensity": {BRICK.hasQUDTReference: QUDTQK["LuminousIntensity"]},
         },
     },
     "Occupancy": {
         SKOS.narrower: {
             "Occupancy_Count": {
-                QUDT.applicableUnit: [UNIT["People"]],
+                # QUDT.applicableUnit: [UNIT["People"]],
                 SKOS.definition: Literal("Number of people in an area"),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("Occupancy_Count"),
@@ -489,20 +546,25 @@ quantity_definitions = {
         SKOS.broader: QUDTQK.Dimensionless,
         QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
     },
-    "Power_Factor": {OWL.sameAs: QUDTQK["PowerFactor"]},
+    "Power_Factor": {BRICK.hasQUDTReference: QUDTQK["PowerFactor"]},
     "Pressure": {
-        OWL.sameAs: QUDTQK["Pressure"],
+        BRICK.hasQUDTReference: QUDTQK["Pressure"],
         SKOS.narrower: {
-            "Atmospheric_Pressure": {OWL.sameAs: QUDTQK["AtmosphericPressure"]},
+            "Atmospheric_Pressure": {
+                BRICK.hasQUDTReference: QUDTQK["AtmosphericPressure"]
+            },
             "Dynamic_Pressure": {},
-            "Static_Pressure": {OWL.sameAs: QUDTQK["StaticPressure"]},
+            "Static_Pressure": {BRICK.hasQUDTReference: QUDTQK["StaticPressure"]},
             "Velocity_Pressure": {
-                OWL.sameAs: [QUDTQK["DynamicPressure"], BRICK["Dynamic_Pressure"]],
+                BRICK.hasQUDTReference: [
+                    QUDTQK["DynamicPressure"],
+                    BRICK["Dynamic_Pressure"],
+                ],
             },
         },
     },
     "Radiance": {
-        OWL.sameAs: QUDTQK["Radiance"],
+        BRICK.hasQUDTReference: QUDTQK["Radiance"],
         SKOS.narrower: {
             "Solar_Radiance": {
                 QUDT.applicableUnit: [UNIT["W-PER-M2-SR"]],
@@ -517,7 +579,7 @@ quantity_definitions = {
     },
     "Speed": {
         # TODO: fan speed is not meter/sec
-        OWL.sameAs: QUDTQK["Speed"],
+        BRICK.hasQUDTReference: QUDTQK["Speed"],
         SKOS.narrower: {
             "Wind_Speed": {
                 QUDT.applicableUnit: [
@@ -528,7 +590,7 @@ quantity_definitions = {
                     UNIT["M-PER-SEC"],
                     UNIT["KiloM-PER-SEC"],
                     UNIT["FT-PER-SEC"],
-                    UNIT["MI-PER-SEC"],
+                    # UNIT["MI-PER-SEC"],
                 ],
                 SKOS.definition: Literal(
                     "Measured speed of wind, caused by air moving from high to low pressure",
@@ -541,7 +603,7 @@ quantity_definitions = {
         },
     },
     "Temperature": {
-        OWL.sameAs: QUDTQK["ThermodynamicTemperature"],
+        BRICK.hasQUDTReference: QUDTQK["ThermodynamicTemperature"],
         SKOS.narrower: {
             "Operative_Temperature": {
                 QUDT.applicableUnit: [UNIT["DEG_F"], UNIT["DEG_C"], UNIT["K"]],
@@ -586,11 +648,11 @@ quantity_definitions = {
         },
     },
     "Time": {
-        OWL.sameAs: QUDTQK["Time"],
+        BRICK.hasQUDTReference: QUDTQK["Time"],
         # TODO: what are these?
         SKOS.narrower: {"Acceleration_Time": {}, "Deceleration_Time": {}},
     },
-    "Torque": {OWL.sameAs: QUDTQK["Torque"]},
+    "Torque": {BRICK.hasQUDTReference: QUDTQK["Torque"]},
     # TODO: https://ci.mines-stetienne.fr/seas/WeatherOntology-0.9#AirTemperature ?
     "Weather_Condition": {},
 }

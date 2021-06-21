@@ -1,16 +1,17 @@
 from rdflib import Namespace
 from .version import BRICK_VERSION
 
-BRICK = Namespace(f"https://brickschema.org/schema/{BRICK_VERSION}/Brick#")
-TAG = Namespace(f"https://brickschema.org/schema/{BRICK_VERSION}/BrickTag#")
-BSH = Namespace(f"https://brickschema.org/schema/{BRICK_VERSION}/BrickShape#")
-SH = Namespace(f"http://www.w3.org/ns/shacl#")
+BRICK = Namespace("https://brickschema.org/schema/Brick#")
+TAG = Namespace("https://brickschema.org/schema/BrickTag#")
+BSH = Namespace("https://brickschema.org/schema/BrickShape#")
+SH = Namespace("http://www.w3.org/ns/shacl#")
+XSD = Namespace("http://www.w3.org/2001/XMLSchema#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
 RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
 DCTERMS = Namespace("http://purl.org/dc/terms#")
-SDO = Namespace("http://schema.org#")
+SDO = Namespace("http://schema.org/")
 SOSA = Namespace("http://www.w3.org/ns/sosa#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 
@@ -39,3 +40,4 @@ def bind_prefixes(g):
     g.bind("qudtqk", QUDTQK)
     g.bind("qudt", QUDT)
     g.bind("unit", UNIT)
+    g.bind("xsd", XSD)

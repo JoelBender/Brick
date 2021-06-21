@@ -7,9 +7,23 @@ system_subclasses = {
     },
     "Electrical_System": {"tags": [TAG.Electrical, TAG.System]},
     "Gas_System": {"tags": [TAG.Gas, TAG.System]},
+    "HVAC_System": {"tags": [TAG.HVAC, TAG.System]},
     "Heating_Ventilation_Air_Conditioning_System": {
+        OWL.equivalentClass: BRICK["HVAC_System"],
         "tags": [TAG.Heat, TAG.Ventilation, TAG.Air, TAG.Conditioning, TAG.System],
         "subclasses": {
+            "Air_System": {
+                "tags": [TAG.Air, TAG.System],
+                "subclasses": {
+                    "Ventilation_Air_System": {
+                        "tags": [
+                            TAG.Ventilation,
+                            TAG.Air,
+                            TAG.System,
+                        ]
+                    },
+                },
+            },
             "Steam_System": {"tags": [TAG.Steam, TAG.System]},
             "Water_System": {
                 "tags": [TAG.Water, TAG.System],
@@ -58,6 +72,9 @@ system_subclasses = {
                                 ]
                             },
                         },
+                    },
+                    "Condenser_Water_System": {
+                        "tags": [TAG.Condenser, TAG.Water, TAG.System]
                     },
                 },
             },
