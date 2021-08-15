@@ -1,4 +1,5 @@
 import csv
+import glob
 import logging
 from collections import defaultdict
 from rdflib import Graph, Literal, BNode, URIRef
@@ -17,6 +18,7 @@ from bricksrc.namespaces import (
     SOSA,
     SKOS,
     QUDT,
+    UNIT,
     VCARD,
     QUDTQK,
     SH,
@@ -29,7 +31,7 @@ from bricksrc.alarm import alarm_definitions
 from bricksrc.status import status_definitions
 from bricksrc.command import command_definitions
 from bricksrc.parameter import parameter_definitions
-from bricksrc.system import system_subclasses
+from bricksrc.collections import collection_classes
 from bricksrc.location import location_subclasses
 from bricksrc.equipment import (
     equipment_subclasses,
@@ -69,6 +71,13 @@ def add_properties(item, propdefs):
                 G.add((item, propname, pv))
         elif not isinstance(propval, dict):
             G.add((item, propname, propval))
+
+
+def units_for_quantity(quantity):
+    """
+    Given a Brick Quantity (the full URI), returns the list of applicable units
+    """
+    return list(G.objects(subject=quantity, predicate=QUDT.applicableUnit))
 
 
 def add_restriction(klass, definition):
@@ -227,7 +236,8 @@ def define_concept_hierarchy(definitions, typeclasses, broader=None, related=Non
             G.add((concept, SKOS.related, related))
         # add label
         class_label = concept.split("#")[-1].replace("_", " ")
-        G.add((concept, RDFS.label, Literal(class_label)))
+        if not G.objects(concept, RDFS.label):
+            G.add((concept, RDFS.label, Literal(class_label)))
 
         # define mapping to substances + quantities if it exists
         # "substances" property is a list of (predicate, object) pairs
@@ -283,7 +293,9 @@ def define_classes(definitions, parent, pun_classes=False):
         G.add((classname, RDFS.subClassOf, parent))
         # add label
         class_label = classname.split("#")[-1].replace("_", " ")
-        G.add((classname, RDFS.label, Literal(class_label)))
+
+        if not G.objects(classname, RDFS.label):
+            G.add((classname, RDFS.label, Literal(class_label)))
         if pun_classes:
             G.add((classname, A, classname))
 
@@ -313,9 +325,20 @@ def define_classes(definitions, parent, pun_classes=False):
         for _parent in parents:
             G.add((classname, RDFS.subClassOf, _parent))
 
+        # add SHACL constraints to the class
+        constraints = defn.get("constraints", {})
+        assert isinstance(constraints, dict)
+        define_constraints(constraints, classname)
+
         # all other key-value pairs in the definition are
         # property-object pairs
-        expected_properties = ["parents", "tags", "substances", "subclasses"]
+        expected_properties = [
+            "parents",
+            "tags",
+            "substances",
+            "subclasses",
+            "constraints",
+        ]
         other_properties = [
             prop for prop in defn.keys() if prop not in expected_properties
         ]
@@ -326,6 +349,33 @@ def define_classes(definitions, parent, pun_classes=False):
                     G.add((classname, propname, pv))
             else:
                 G.add((classname, propname, propval))
+
+
+def define_constraints(constraints, classname):
+    """
+    Makes 'classname' a SHACL NodeShape and Class (implicitly targeting all
+    instances of the class) and defines some PropertyShapes based on 'constraints'
+    that apply to the nodeshape.
+    """
+    for property_name, property_values in constraints.items():
+        pnode = BNode()
+        onode = BNode()
+        G.add((classname, A, SH.NodeShape))
+        G.add((classname, SH.property, pnode))
+        G.add((pnode, SH["path"], property_name))
+
+        if isinstance(property_values, URIRef):
+            G.add((pnode, SH["class"], property_values))
+        elif isinstance(property_values, list):
+            G.add((pnode, SH["or"], onode))
+            possible_values = []
+            for pv in property_values:
+                pvnode = BNode()
+                G.add((pvnode, SH["class"], pv))
+                possible_values.append(pvnode)
+            Collection(G, onode, possible_values)
+        else:
+            raise Exception("Do not know how to handle constraints for %s" % classname)
 
 
 def define_entity_properties(definitions, superprop=None):
@@ -349,6 +399,32 @@ def define_entity_properties(definitions, superprop=None):
                 G.add((entprop, prop, values))
 
 
+def define_shape_property_property(shape_name, definitions):
+    for prop_name, prop_defn in definitions.items():
+        ps = BNode()
+        G.add((shape_name, SH.property, ps))
+        G.add((ps, A, SH.PropertyShape))
+        G.add((ps, SH.path, prop_name))
+        if "optional" in prop_defn:
+            if not prop_defn.pop("optional"):
+                G.add((ps, SH.minCount, Literal(1)))
+        else:
+            G.add((ps, SH.minCount, Literal(1)))
+
+        if "datatype" in prop_defn:
+            dtype = prop_defn.pop("datatype")
+            if dtype == BSH.NumericValue:
+                G.add((ps, SH["or"], BSH.NumericValue))
+            else:
+                G.add((ps, SH.datatype, dtype))
+        elif "values" in prop_defn:
+            enumeration = BNode()
+            G.add((ps, SH["in"], enumeration))
+            G.add((ps, SH.minCount, Literal(1)))
+            Collection(G, enumeration, map(Literal, prop_defn.pop("values")))
+        add_properties(ps, prop_defn)
+
+
 def define_shape_properties(definitions):
     """
     Defines the NodeShapes that govern what the values of
@@ -356,6 +432,8 @@ def define_shape_properties(definitions):
     keys are:
     - values: defines the set of possible values of this property as an enumeration
     - units: verifies that the units of the value are one of the given enumeration.
+    - unitsFromQuantity: verifies that the units of the value are compatible with the units
+                for the given Brick quantity
     - datatype: specifies the expected kind of data type of prop:value
     - properties: defines other epected properties of the Shape. These properties can have
                 'datatype' or 'values', in addition to other standard properties like
@@ -367,6 +445,7 @@ def define_shape_properties(definitions):
     """
     for shape_name, defn in definitions.items():
         G.add((shape_name, A, SH.NodeShape))
+        G.add((shape_name, A, OWL.Class))
 
         v = BNode()
         # prop:value PropertyShape
@@ -378,7 +457,25 @@ def define_shape_properties(definitions):
             G.add((ps, SH.path, BRICK.value))
             G.add((ps, SH["in"], enumeration))
             G.add((ps, SH.minCount, Literal(1)))
-            Collection(G, enumeration, map(Literal, defn.pop("values")))
+            vals = defn.pop("values")
+            if isinstance(vals[0], str):
+                Collection(
+                    G, enumeration, map(lambda x: Literal(x, datatype=XSD.string), vals)
+                )
+            elif isinstance(vals[0], int):
+                Collection(
+                    G,
+                    enumeration,
+                    map(lambda x: Literal(x, datatype=XSD.integer), vals),
+                )
+            elif isinstance(vals[0], float):
+                Collection(
+                    G,
+                    enumeration,
+                    map(lambda x: Literal(x, datatype=XSD.decimal), vals),
+                )
+            else:
+                Collection(G, enumeration, map(Literal, vals))
         if "units" in defn:
             ps = BNode()
             enumeration = BNode()
@@ -388,27 +485,38 @@ def define_shape_properties(definitions):
             G.add((ps, SH["in"], enumeration))
             G.add((ps, SH.minCount, Literal(1)))
             Collection(G, enumeration, defn.pop("units"))
+        if "unitsFromQuantity" in defn:
+            ps = BNode()
+            enumeration = BNode()
+            G.add((shape_name, SH.property, ps))
+            G.add((ps, A, SH.PropertyShape))
+            G.add((ps, SH.path, BRICK.hasUnit))
+            G.add((ps, SH["in"], enumeration))
+            G.add((ps, SH.minCount, Literal(1)))
+            Collection(G, enumeration, units_for_quantity(defn.pop("unitsFromQuantity")))
         if "properties" in defn:
-            for prop_name, prop_defn in defn.pop("properties").items():
-                ps = BNode()
-                G.add((shape_name, SH.property, ps))
-                G.add((ps, A, SH.PropertyShape))
-                G.add((ps, SH.path, prop_name))
-                G.add((ps, SH.minCount, Literal(1)))
-                if "datatype" in prop_defn:
-                    G.add((ps, SH.datatype, prop_defn.pop("datatype")))
-                elif "values" in prop_defn:
-                    enumeration = BNode()
-                    G.add((ps, SH["in"], enumeration))
-                    G.add((ps, SH.minCount, Literal(1)))
-                    Collection(G, enumeration, map(Literal, prop_defn.pop("values")))
-                add_properties(ps, prop_defn)
+            prop_defns = defn.pop("properties")
+            define_shape_property_property(shape_name, prop_defns)
         elif "datatype" in defn:
             G.add((shape_name, SH.property, v))
             G.add((v, A, SH.PropertyShape))
             G.add((v, SH.path, BRICK.value))
-            G.add((v, SH.datatype, defn.pop("datatype")))
+            dtype = defn.pop("datatype")
+            if dtype == BSH.NumericValue:
+                G.add((v, SH["or"], BSH.NumericValue))
+            else:
+                G.add((v, SH.datatype, dtype))
             G.add((v, SH.minCount, Literal(1)))
+            if "range" in defn:
+                for prop_name, prop_value in defn.pop("range").items():
+                    if prop_name not in [
+                        "minExclusive",
+                        "minInclusive",
+                        "maxExclusive",
+                        "maxInclusive",
+                    ]:
+                        raise Exception(f"brick:value property {prop_name} not valid")
+                    G.add((v, SH[prop_name], Literal(prop_value)))
 
 
 def define_properties(definitions, superprop=None):
@@ -534,12 +642,7 @@ roots = {
     "Location": {"tags": [TAG.Location]},
     "Point": {"tags": [TAG.Point]},
     "Measurable": {},
-    "System": {
-        SKOS.definition: Literal(
-            "A System is a combination of equipment and auxiliary devices (e.g., controls, accessories, interconnecting means, and termi­nal elements) by which energy is transformed so it performs a specific function such as HVAC, service water heating, or lighting. (ASHRAE Dictionary)."
-        ),
-        "tags": [TAG.System],
-    },
+    "Collection": {"tags": [TAG.Collection]},
 }
 define_classes(roots, BRICK.Class)
 
@@ -569,7 +672,7 @@ logging.info("Defining Equipment, System and Location subclasses")
 # define other root class structures
 define_classes(location_subclasses, BRICK.Location)
 define_classes(equipment_subclasses, BRICK.Equipment)
-define_classes(system_subclasses, BRICK.System)
+define_classes(collection_classes, BRICK.Collection)
 define_classes(hvac_subclasses, BRICK.HVAC_Equipment)
 define_classes(valve_subclasses, BRICK.Valve)
 define_classes(security_subclasses, BRICK.Security_Equipment)
@@ -593,14 +696,6 @@ G.add(
 )  # needs the type declaration to satisfy some checkers
 G.add((BRICK.Substance, RDFS.subClassOf, BRICK.Measurable))
 G.add((BRICK.Substance, A, OWL.Class))
-
-# entity property definitions
-G.add((BRICK.value, A, OWL.DatatypeProperty))
-G.add((BRICK.value, SKOS.definition, Literal("The basic value of an entity property")))
-G.add((BRICK.EntityProperty, RDFS.subClassOf, OWL.ObjectProperty))
-G.add((BRICK.EntityProperty, A, OWL.Class))
-define_shape_properties(shape_properties)
-define_entity_properties(entity_properties)
 
 # define timeseries model
 define_timeseries_model(G)
@@ -627,37 +722,54 @@ res = G.query(
                 }"""
 )
 for r in res:
-    for unit, symb in get_units(r[1]):
+    for unit, symb, label in get_units(r[1]):
         G.add((r[0], QUDT.applicableUnit, unit))
+        G.add((unit, A, UNIT.Unit))
         if symb is not None:
             G.add((unit, QUDT.symbol, symb))
+        if label is not None and not G.objects(unit, RDFS.label):
+            G.add((unit, RDFS.label, label))
+
+
+# entity property definitions (must happen after units are defined)
+G.add((BRICK.value, A, OWL.DatatypeProperty))
+G.add((BRICK.value, SKOS.definition, Literal("The basic value of an entity property")))
+G.add((BRICK.EntityProperty, RDFS.subClassOf, OWL.ObjectProperty))
+G.add((BRICK.EntityProperty, A, OWL.Class))
+define_shape_properties(shape_properties)
+define_entity_properties(entity_properties)
 
 logging.info("Adding class definitions")
 add_definitions()
 
+# add all TTL files in bricksrc
+for ttlfile in glob.glob("bricksrc/*.ttl"):
+    G.parse(ttlfile, format="turtle")
+
 logging.info(f"Brick ontology compilation finished! Generated {len(G)} triples")
+
 
 extension_graphs = {"shacl_tag_inference": shaclGraph}
 
 # serialize extensions to output
 for name, graph in extension_graphs.items():
-    with open(f"extensions/brick_extension_{name}.ttl", "wb") as fp:
+    with open(f"extensions/brick_extension_{name}.ttl", "w") as fp:
         # need to write this manually; turtle serializer doesn't always add
-        fp.write(b"@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n")
+        fp.write("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n")
         fp.write(graph.serialize(format="turtle").rstrip())
-        fp.write(b"\n")
+        fp.write("\n")
 
 # add SHACL shapes to graph
-G.parse("shacl/BrickShape.ttl", format="ttl")
+G.parse("shacl/BrickEntityShapeBase.ttl", format="ttl")
 
 # serialize Brick to output
-with open("Brick.ttl", "wb") as fp:
+with open("Brick.ttl", "w") as fp:
     fp.write(G.serialize(format="turtle").rstrip())
-    fp.write(b"\n")
+    fp.write("\n")
 
 # serialize Brick + extensions
 for graph in extension_graphs.values():
     G += graph
-with open("Brick+extensions.ttl", "wb") as fp:
+with open("Brick+extensions.ttl", "w") as fp:
     fp.write(G.serialize(format="turtle").rstrip())
-    fp.write(b"\n")
+    fp.write("\n")
