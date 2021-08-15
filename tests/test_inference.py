@@ -65,7 +65,7 @@ g.add((BLDG.standalone, A, BRICK.Temperature_Sensor))
 def test_tag_inference():
 
     # Apply reasoner
-    g.load_extension("shacl_tag_inference")
+    g.load_file("extensions/brick_extension_shacl_tag_inference.ttl")
     g.expand(profile="owlrl+shacl+owlrl")
 
     g.bind("rdf", RDF)
@@ -93,7 +93,7 @@ def test_tag_inference():
     res2 = make_readable(
         g.query(
             "SELECT DISTINCT ?sensor WHERE {\
-                                    ?sensor brick:measures brick:CO2\
+                                    ?sensor brick:measures brick:CO2_Concentration\
                                   }"
         )
     )
