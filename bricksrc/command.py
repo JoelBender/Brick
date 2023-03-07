@@ -1,26 +1,50 @@
 from rdflib import Literal
-from .namespaces import TAG, BRICK
+from .namespaces import TAG, BRICK, QUDT
 
 command_definitions = {
     "Command": {
         "tags": [TAG.Point, TAG.Command],
         "subclasses": {
+            "Boiler_Command": {"tags": [TAG.Boiler, TAG.Command, TAG.Point]},
+            "Tint_Command": {"tags": [TAG.Tint, TAG.Command, TAG.Point]},
+            "Fan_Command": {
+                "tags": [TAG.Fan, TAG.Command, TAG.Point],
+                "subclasses": {
+                    "Fan_Speed_Command": {
+                        "tags": [TAG.Fan, TAG.Command, TAG.Point, TAG.Speed],
+                    }
+                },
+            },
+            "Relay_Command": {"tags": [TAG.Point, TAG.Relay, TAG.Command]},
+            "Light_Command": {"tags": [TAG.Point, TAG.Light, TAG.Command]},
+            "Speed_Command": {"tags": [TAG.Point, TAG.Speed, TAG.Command]},
             "Cooling_Command": {"tags": [TAG.Point, TAG.Cool, TAG.Command]},
             "Heating_Command": {"tags": [TAG.Point, TAG.Heat, TAG.Command]},
+            "Preheat_Command": {"tags": [TAG.Point, TAG.Preheat, TAG.Command]},
             "Luminance_Command": {"tags": [TAG.Point, TAG.Luminance, TAG.Command]},
             "Bypass_Command": {"tags": [TAG.Point, TAG.Bypass, TAG.Command]},
             "Damper_Command": {
                 "tags": [TAG.Point, TAG.Damper, TAG.Command],
                 "subclasses": {
                     "Damper_Position_Command": {
+                        BRICK.hasQuantity: BRICK.Position,
                         "tags": [TAG.Point, TAG.Damper, TAG.Position, TAG.Command],
                         "parents": [BRICK.Position_Command],
                     },
                 },
             },
-            "Humidify_Command": {"tags": [TAG.Point, TAG.Humidify, TAG.Command]},
-            "Position_Command": {"tags": [TAG.Point, TAG.Position, TAG.Command]},
-            "Direction_Command": {"tags": [TAG.Point, TAG.Direction, TAG.Command]},
+            "Humidify_Command": {
+                "tags": [TAG.Point, TAG.Humidify, TAG.Command],
+                BRICK.hasQuantity: BRICK.Humidity,
+            },
+            "Position_Command": {
+                "tags": [TAG.Point, TAG.Position, TAG.Command],
+                BRICK.hasQuantity: BRICK.Position,
+            },
+            "Direction_Command": {
+                "tags": [TAG.Point, TAG.Direction, TAG.Command],
+                BRICK.hasQuantity: BRICK.Direction,
+            },
             "Pump_Command": {
                 # TODO: position?
                 "tags": [TAG.Point, TAG.Pump, TAG.Command],
@@ -28,6 +52,13 @@ command_definitions = {
             "Valve_Command": {
                 # TODO: position?
                 "tags": [TAG.Point, TAG.Valve, TAG.Command],
+                "subclasses": {
+                    "Valve_Position_Command": {
+                        BRICK.hasQuantity: BRICK.Position,
+                        "tags": [TAG.Point, TAG.Valve, TAG.Position, TAG.Command],
+                        "parents": [BRICK.Position_Command],
+                    },
+                },
             },
             "Reset_Command": {
                 "tags": [TAG.Point, TAG.Reset, TAG.Command],
@@ -39,6 +70,7 @@ command_definitions = {
                         "tags": [TAG.Point, TAG.Filter, TAG.Reset, TAG.Command],
                     },
                     "Speed_Reset_Command": {
+                        BRICK.hasQuantity: BRICK.Speed,
                         "tags": [TAG.Point, TAG.Speed, TAG.Reset, TAG.Command],
                     },
                 },
@@ -86,15 +118,6 @@ command_definitions = {
                                 },
                             },
                         },
-                    },
-                    "Exhaust_Fan_Enable_Command": {
-                        "tags": [
-                            TAG.Point,
-                            TAG.Enable,
-                            TAG.Command,
-                            TAG.Fan,
-                            TAG.Exhaust,
-                        ],
                     },
                     "Run_Enable_Command": {
                         "tags": [TAG.Point, TAG.Enable, TAG.Command, TAG.Run],
@@ -149,15 +172,6 @@ command_definitions = {
             "Disable_Command": {
                 "tags": [TAG.Point, TAG.Disable, TAG.Command],
                 "subclasses": {
-                    "Exhaust_Fan_Disable_Command": {
-                        "tags": [
-                            TAG.Point,
-                            TAG.Disable,
-                            TAG.Command,
-                            TAG.Fan,
-                            TAG.Exhaust,
-                        ],
-                    },
                     "Disable_Differential_Enthalpy_Command": {
                         "tags": [
                             TAG.Point,
@@ -280,13 +294,14 @@ command_definitions = {
                 },
             },
             "Frequency_Command": {
-                "tags": [TAG.Point, TAG.Fequency, TAG.Command],
+                "tags": [TAG.Point, TAG.Frequency, TAG.Command],
+                BRICK.hasQuantity: BRICK.Frequency,
                 "subclasses": {
                     "Max_Frequency_Command": {
-                        "tags": [TAG.Point, TAG.Max, TAG.Fequency, TAG.Command],
+                        "tags": [TAG.Point, TAG.Max, TAG.Frequency, TAG.Command],
                     },
                     "Min_Frequency_Command": {
-                        "tags": [TAG.Point, TAG.Min, TAG.Fequency, TAG.Command],
+                        "tags": [TAG.Point, TAG.Min, TAG.Frequency, TAG.Command],
                     },
                 },
             },

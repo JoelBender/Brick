@@ -6,19 +6,16 @@ on:
         - master
         - v1.*
   pull_request:
-    branches:
-        - master
-        - v1.*
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7.9, 3.8.5, 3.9.0]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - name: Set up AllegroGraph (Docker)
@@ -39,6 +36,13 @@ jobs:
         cd shacl
         python generate_shacl.py
         cd ..
+    - name: upload ttls
+      if: ${{ matrix.python-version }} == "3.10"
+      uses: actions/upload-artifact@v3
+      with:
+        name: Brick-ontology
+        path: |
+          Brick.ttl
     - name: Run the tests
       # -s flag: do not capture output (avoids killing test after 10 min)
       run: |

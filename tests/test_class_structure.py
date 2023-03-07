@@ -15,21 +15,19 @@ from bricksrc.namespaces import (  # noqa: E402
 )
 
 
-BLDG = Namespace("https://brickschema.org/schema/ExampleBuilding#")
-
-g = brickschema.Graph()
-g.parse("Brick.ttl", format="turtle")
-g.expand("shacl+owlrl")
-
-g.bind("rdf", RDF)
-g.bind("owl", OWL)
-g.bind("rdfs", RDFS)
-g.bind("brick", BRICK)
-g.bind("tag", TAG)
-g.bind("bldg", BLDG)
-
-
 def test_subclasses():
+    BLDG = Namespace("https://brickschema.org/schema/ExampleBuilding#")
+
+    g = brickschema.Graph()
+    g.parse("Brick.ttl", format="turtle")
+    g.expand("shacl")
+
+    g.bind("rdf", RDF)
+    g.bind("owl", OWL)
+    g.bind("rdfs", RDFS)
+    g.bind("brick", BRICK)
+    g.bind("tag", TAG)
+    g.bind("bldg", BLDG)
     subclasses1 = g.query(
         "SELECT ?parent ?child WHERE {\
                                 ?child rdfs:subClassOf ?parent . \
@@ -71,13 +69,14 @@ def test_subclasses():
             OWL.ObjectProperty,
             VCARD.Address,
             SKOS.Concept,
-            UNIT.Unit,
+            QUDT.Unit,
             QUDT.QuantityKind,
             XSD.string,
         ]
     )
 
+    remaining = diff.difference(expected)
     assert diff.issubset(
         expected
     ), f"Got extra classes that may not be defined: \
-                                      {diff.difference(expected)}"
+                                      {remaining}"

@@ -17,16 +17,19 @@ def get_units(qudt_quantity):
     in order to avoid having to pull the full QUDT ontology into Brick
     """
     return g.query(
-        f"""SELECT ?unit ?symbol ?label WHERE {{
+        f"""SELECT ?unit WHERE {{
                     <{qudt_quantity}> qudt:applicableUnit ?unit .
-                    OPTIONAL {{
-                        ?unit qudt:symbol ?symbol .
-                        FILTER(isLiteral(?symbol))
-                    }} .
-                    OPTIONAL {{
-                        ?unit rdfs:label ?label .
-                    }}
-                    }}"""
+                }}"""
+    )
+
+
+def all_units():
+    return g.query(
+        """SELECT ?unit ?symbol ?label WHERE {
+        ?unit a qudt:Unit .
+        OPTIONAL { ?unit qudt:symbol ?symbol } .
+        OPTIONAL { ?unit rdfs:label ?label} .
+    }"""
     )
 
 
@@ -39,13 +42,10 @@ quantity_definitions = {
             "Ammonia_Concentration": {
                 QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
                 QUDT.hasDimensionVector: QUDTDV["A0E0L0I0M0H0T0D1"],
-                SKOS.definition: Literal(
-                    "The concentration of Ammonia in a medium"
-                ),
+                SKOS.definition: Literal("The concentration of Ammonia in a medium"),
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                 RDFS.label: Literal("AmmoniaConcentration"),
                 SKOS.broader: QUDTQK.DimensionlessRatio,
-
             },
             "CO_Concentration": {
                 QUDT.applicableUnit: [UNIT.PPM, UNIT.PPB],
@@ -414,7 +414,18 @@ quantity_definitions = {
     "Energy": {
         SKOS.narrower: {
             "Electric_Energy": {
-                QUDT.applicableUnit: [UNIT.J],
+                QUDT.applicableUnit: [
+                    UNIT.J,
+                    UNIT["W-HR"],
+                    UNIT["KiloW-HR"],
+                    UNIT["MegaW-HR"],
+                    UNIT["V-A_Reactive-HR"],
+                    UNIT["KiloV-A_Reactive-HR"],
+                    UNIT["MegaV-A_Reactive-HR"],
+                    UNIT["KiloV-A-HR"],
+                    UNIT["V-A-HR"],
+                    UNIT["MegaV-A-HR"],
+                ],
                 QUDT.hasDimensionVector: QUDTDV["A0E0L2I0M1H0T-2D0"],
                 SKOS.definition: Literal(
                     "A form of energy resulting from the flow of electrical charge"
@@ -435,8 +446,24 @@ quantity_definitions = {
                         RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
                         RDFS.label: Literal("Active_Energy"),
                     },
+                    "Reactive_Energy": {
+                        QUDT.applicableUnit: [
+                            UNIT["V-A_Reactive-HR"],
+                            UNIT["KiloV-A_Reactive-HR"],
+                            UNIT["MegaV-A_Reactive-HR"],
+                        ],
+                        SKOS.definition: Literal(
+                            "The integral of the reactive power over a time interval"
+                        ),
+                        RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                        RDFS.label: Literal("Reactive_Energy"),
+                    },
                     "Apparent_Energy": {
-                        QUDT.applicableUnit: [UNIT["KiloV-A-HR"]],
+                        QUDT.applicableUnit: [
+                            UNIT["KiloV-A-HR"],
+                            UNIT["V-A-HR"],
+                            UNIT["MegaV-A-HR"],
+                        ],
                         SKOS.definition: Literal(
                             "The integral of the apparent power over a time interval"
                         ),
@@ -622,7 +649,7 @@ quantity_definitions = {
                         BRICK.hasQUDTReference: QUDTQK["DynamicPressure"],
                         QUDT.isDeltaQuantity: Literal(True),
                     },
-                }
+                },
             },
         },
     },
@@ -641,10 +668,9 @@ quantity_definitions = {
         },
     },
     "Speed": {
-        # TODO: fan speed is not meter/sec
         BRICK.hasQUDTReference: QUDTQK["Speed"],
         SKOS.narrower: {
-            "Wind_Speed": {
+            "Linear_Speed": {
                 QUDT.applicableUnit: [
                     UNIT["M-PER-HR"],
                     UNIT["KiloM-PER-HR"],
@@ -653,16 +679,33 @@ quantity_definitions = {
                     UNIT["M-PER-SEC"],
                     UNIT["KiloM-PER-SEC"],
                     UNIT["FT-PER-SEC"],
-                    # UNIT["MI-PER-SEC"],
+                    UNIT["MI-PER-SEC"],
                 ],
                 SKOS.definition: Literal(
-                    "Measured speed of wind, caused by air moving from high to low pressure",
+                    "Speed in one dimension (linear)",
                 ),
                 QUDT.hasDimensionVector: QUDTDV["A0E0L1I0M0H0T-1D0"],
                 RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
-                RDFS.label: Literal("Wind_Speed"),
+                RDFS.label: Literal("Linear_Speed"),
                 SKOS.broader: QUDTQK.Speed,
-            }
+            },
+            "Rotational_Speed": {
+                QUDT.applicableUnit: [
+                    UNIT["RAD-PER-HR"],
+                    UNIT["RAD-PER-SEC"],
+                    UNIT["RAD-PER-MIN"],
+                    UNIT["DEG-PER-HR"],
+                    UNIT["DEG-PER-MIN"],
+                    UNIT["DEG-PER-SEC"],
+                ],
+                SKOS.definition: Literal(
+                    "Rotational speed",
+                ),
+                QUDT.hasDimensionVector: QUDTDV["A0E0L1I0M0H0T-1D0"],
+                RDFS.isDefinedBy: URIRef(str(BRICK).strip("#")),
+                RDFS.label: Literal("Rotational_Speed"),
+                SKOS.broader: [QUDTQK.Speed, QUDTQK.Frequency],
+            },
         },
     },
     "Temperature": {

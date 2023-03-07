@@ -12,7 +12,11 @@ system_subclasses = {
                 "subclasses": {
                     "Energy_Generation_System": {
                         "tags": [TAG.Energy, TAG.Generation, TAG.System],
-                        "subclasses": {"PV_Generation_System": {}},
+                        "subclasses": {
+                            "PV_Generation_System": {
+                                "tags": [TAG.Photovoltaic, TAG.Generation, TAG.System],
+                            }
+                        },
                     },
                     "Energy_Storage_System": {
                         "tags": [TAG.Energy, TAG.Storage, TAG.System],
@@ -118,7 +122,12 @@ system_subclasses = {
             },
         },
     },
-    "Shading_System": {"tags": [TAG.Shade, TAG.System]},
+    "Shading_System": {
+        "tags": [TAG.Shade, TAG.System],
+        "subclasses": {
+            "Blind_Group": {"tags": [TAG.Shade, TAG.System, TAG.Blind, TAG.Group]},
+        },
+    },
 }
 
 loop_subclasses = {
