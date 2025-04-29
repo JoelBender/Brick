@@ -1,4 +1,4 @@
-from .namespaces import TAG, BRICK, OWL, QUDT
+from .namespaces import TAG, BRICK, OWL, QUDTQK
 
 status_definitions = {
     "Status": {
@@ -17,7 +17,6 @@ status_definitions = {
             "Damper_Position_Status": {
                 "tags": [TAG.Point, TAG.Damper, TAG.Position, TAG.Status],
                 BRICK.hasQuantity: BRICK.Position,
-                "tags": [TAG.Damper, TAG.Position, TAG.Status, TAG.Point],
             },
             "Direction_Status": {
                 BRICK.hasQuantity: BRICK.Direction,
@@ -246,6 +245,9 @@ status_definitions = {
             },
             "Mode_Status": {
                 "subclasses": {
+                    "Speed_Mode_Status": {
+                        "tags": [TAG.Point, TAG.Speed, TAG.Status, TAG.Mode],
+                    },
                     "Zone_Air_Conditioning_Mode_Status": {
                         "tags": [
                             TAG.Point,
@@ -464,25 +466,14 @@ status_definitions = {
                 "tags": [TAG.Point, TAG.Overridden, TAG.Status],
             },
             "Pressure_Status": {
-                QUDT.hasQuality: BRICK.Pressure,
+                BRICK.hasQuantity: QUDTQK.Pressure,
                 "subclasses": {
-                    "Discharge_Air_Duct_Pressure_Status": {
-                        "tags": [
-                            TAG.Point,
-                            TAG.Discharge,
-                            TAG.Air,
-                            TAG.Duct,
-                            TAG.Pressure,
-                            TAG.Status,
-                        ],
-                    },
                     "Supply_Air_Duct_Pressure_Status": {
-                        OWL.equivalentClass: BRICK[
-                            "Discharge_Air_Duct_Pressure_Status"
-                        ],
+                        "aliases": [BRICK["Discharge_Air_Duct_Pressure_Status"]],
                         "tags": [
                             TAG.Point,
                             TAG.Supply,
+                            TAG.Discharge,
                             TAG.Air,
                             TAG.Duct,
                             TAG.Pressure,
@@ -493,6 +484,9 @@ status_definitions = {
                 "tags": [TAG.Point, TAG.Pressure, TAG.Status],
             },
             "Lead_Lag_Status": {"tags": [TAG.Point, TAG.Lead, TAG.Lag, TAG.Status]},
+            "Level_Status": {
+                "tags": [TAG.Level, TAG.Status, TAG.Point],
+            },
             "Stages_Status": {"tags": [TAG.Point, TAG.Stages, TAG.Status]},
             "System_Shutdown_Status": {
                 "tags": [TAG.Point, TAG.System, TAG.Shutdown, TAG.Status],
@@ -548,15 +542,6 @@ status_definitions = {
                             },
                         },
                     },
-                },
-            },
-            "Speed_Status": {
-                "tags": [TAG.Point, TAG.Speed, TAG.Status],
-                "subclasses": {
-                    "Speed_Mode_Status": {
-                        "tags": [TAG.Point, TAG.Speed, TAG.Status, TAG.Mode],
-                        "parents": [BRICK.Mode_Status],
-                    }
                 },
             },
         },

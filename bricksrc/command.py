@@ -1,5 +1,5 @@
 from rdflib import Literal
-from .namespaces import TAG, BRICK, QUDT
+from .namespaces import TAG, BRICK, QUDTQK
 
 command_definitions = {
     "Command": {
@@ -16,11 +16,27 @@ command_definitions = {
                 },
             },
             "Relay_Command": {"tags": [TAG.Point, TAG.Relay, TAG.Command]},
-            "Light_Command": {"tags": [TAG.Point, TAG.Light, TAG.Command]},
+            "Level_Command": {
+                "tags": [TAG.Level, TAG.Command, TAG.Point],
+            },
+            "Lighting_Level_Command": {
+                "tags": [TAG.Point, TAG.Lighting, TAG.Level, TAG.Command]
+            },
+            "Lighting_Correlated_Color_Temperature_Command": {
+                "tags": [
+                    TAG.Point,
+                    TAG.Lighting,
+                    TAG.Correlated,
+                    TAG.Color,
+                    TAG.Temperature,
+                    TAG.Command,
+                ],
+            },
             "Speed_Command": {"tags": [TAG.Point, TAG.Speed, TAG.Command]},
             "Cooling_Command": {"tags": [TAG.Point, TAG.Cool, TAG.Command]},
             "Heating_Command": {"tags": [TAG.Point, TAG.Heat, TAG.Command]},
             "Preheat_Command": {"tags": [TAG.Point, TAG.Preheat, TAG.Command]},
+            "Reheat_Command": {"tags": [TAG.Point, TAG.Reheat, TAG.Command]},
             "Luminance_Command": {"tags": [TAG.Point, TAG.Luminance, TAG.Command]},
             "Bypass_Command": {"tags": [TAG.Point, TAG.Bypass, TAG.Command]},
             "Damper_Command": {
@@ -33,9 +49,13 @@ command_definitions = {
                     },
                 },
             },
+            "Dehumidify_Command": {
+                "tags": [TAG.Point, TAG.Dehumidify, TAG.Command],
+                BRICK.hasSubstance: BRICK.Air,
+            },
             "Humidify_Command": {
                 "tags": [TAG.Point, TAG.Humidify, TAG.Command],
-                BRICK.hasQuantity: BRICK.Humidity,
+                BRICK.hasSubstance: BRICK.Air,
             },
             "Position_Command": {
                 "tags": [TAG.Point, TAG.Position, TAG.Command],
@@ -295,7 +315,7 @@ command_definitions = {
             },
             "Frequency_Command": {
                 "tags": [TAG.Point, TAG.Frequency, TAG.Command],
-                BRICK.hasQuantity: BRICK.Frequency,
+                BRICK.hasQuantity: QUDTQK.Frequency,
                 "subclasses": {
                     "Max_Frequency_Command": {
                         "tags": [TAG.Point, TAG.Max, TAG.Frequency, TAG.Command],
@@ -311,6 +331,9 @@ command_definitions = {
                 "subclasses": {
                     "Off_Command": {"tags": [TAG.Point, TAG.Off, TAG.Command]},
                     "On_Command": {"tags": [TAG.Point, TAG.On, TAG.Command]},
+                    "Open_Close_Command": {
+                        "tags": [TAG.Point, TAG.Open, TAG.Close, TAG.Command]
+                    },
                     "Lead_On_Off_Command": {
                         "tags": [TAG.Point, TAG.Lead, TAG.On, TAG.Off, TAG.Command],
                     },

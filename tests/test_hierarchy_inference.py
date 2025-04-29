@@ -9,7 +9,6 @@ from .util import make_readable
 import sys
 
 sys.path.append("..")
-from bricksrc.version import BRICK_VERSION  # noqa: E402
 from bricksrc.namespaces import BRICK  # noqa: E402
 
 """
@@ -56,7 +55,7 @@ def test_hierarchyinference():
     # Infer classes of the entities.
     # Apply reasoner
     g.load_file("extensions/brick_extension_shacl_tag_inference.ttl")
-    g.expand(profile="shacl")
+    g.expand(profile="shacl", backend="topquadrant")
     g.serialize(inference_file, format="turtle")  # Store the inferred graph.
 
     # Find all instances and their parents from the inferred graph.
@@ -80,7 +79,7 @@ def test_hierarchyinference():
         ?c1 owl:equivalentClass ?c2
     }"""
     )
-    for (c1, c2) in res:
+    for c1, c2 in res:
         equivalent_classes[c1].add(c2)
         equivalent_classes[c2].add(c1)
 

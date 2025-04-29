@@ -1,7 +1,10 @@
-from .namespaces import TAG, BRICK, OWL, SKOS
+from .namespaces import BRICK, OWL, SKOS, TAG
 
 # Defining substances
 substances = {
+    "Light": {
+        "tags": [TAG.Light],
+    },
     "Fluid": {
         SKOS.narrower: {
             "Refrigerant": {},
@@ -60,7 +63,13 @@ substances = {
                                     "Leaving_Condenser_Water": {},
                                 },
                             },
-                            "Domestic_Water": {},
+                            "Domestic_Water": {
+                                SKOS.narrower: {
+                                    "Domestic_Hot_Water": {
+                                        "parents": [BRICK.Hot_Water],
+                                    },
+                                }
+                            },
                             "Potable_Water": {},
                             "Leaving_Water": {},
                             "Entering_Water": {},

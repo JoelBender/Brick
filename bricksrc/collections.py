@@ -1,6 +1,9 @@
 from .namespaces import TAG, OWL, BRICK
 
 system_subclasses = {
+    "Automatic_Tint_Window_Array": {
+        "tags": [TAG.System, TAG.Tint, TAG.Array, TAG.Shade]
+    },
     "Domestic_Hot_Water_System": {
         "tags": [TAG.Domestic, TAG.Water, TAG.Hot, TAG.System]
     },
@@ -36,10 +39,16 @@ system_subclasses = {
         },
     },
     "Gas_System": {"tags": [TAG.Gas, TAG.System]},
-    "HVAC_System": {"tags": [TAG.HVAC, TAG.System]},
     "Heating_Ventilation_Air_Conditioning_System": {
-        OWL.equivalentClass: BRICK["HVAC_System"],
-        "tags": [TAG.Heat, TAG.Ventilation, TAG.Air, TAG.Conditioning, TAG.System],
+        "tags": [
+            TAG.Heat,
+            TAG.Ventilation,
+            TAG.Air,
+            TAG.Conditioning,
+            TAG.HVAC,
+            TAG.System,
+        ],
+        "aliases": [BRICK["HVAC_System"]],
         "subclasses": {
             "Air_System": {
                 "tags": [TAG.Air, TAG.System],
@@ -53,6 +62,8 @@ system_subclasses = {
                     },
                 },
             },
+            "VRF_System": {"tags": [TAG.Variable, TAG.Refrigerant, TAG.Flow, TAG.System]},
+            "Refrigeration_System": {"tags": [TAG.Refrigeration, TAG.System]},
             "Steam_System": {"tags": [TAG.Steam, TAG.System]},
             "Water_System": {
                 "tags": [TAG.Water, TAG.System],
@@ -138,6 +149,7 @@ loop_subclasses = {
             "Hot_Water_Loop": {"tags": [TAG.Hot, TAG.Water, TAG.Loop]},
             "Chilled_Water_Loop": {"tags": [TAG.Chilled, TAG.Water, TAG.Loop]},
             "Domestic_Water_Loop": {"tags": [TAG.Domestic, TAG.Water, TAG.Loop]},
+            "Condenser_Water_Loop": {"tags": [TAG.Condenser, TAG.Water, TAG.Loop]},
         },
     },
 }
@@ -167,13 +179,13 @@ collection_classes = {
         "constraints": {BRICK.hasPart: [BRICK.Equipment, BRICK.Point, BRICK.Location]},
     },
     "Photovoltaic_Array": {
-        "tags": [TAG.Collection, TAG.Photovoltaic, TAG.Array],
+        "tags": [TAG.Collection, TAG.Photovoltaic, TAG.PV, TAG.Array],
+        "aliases": [BRICK["PV_Array"]],
         "constraints": {BRICK.hasPart: [BRICK.PV_Panel]},
-        OWL.equivalentClass: BRICK["PV_Array"],
     },
-    "PV_Array": {
-        "tags": [TAG.Collection, TAG.PV, TAG.Array],
-        "constraints": {BRICK.hasPart: [BRICK.PV_Panel]},
-        OWL.equivalentClass: BRICK["Photovoltaic_Array"],
+    "Electric_Vehicle_Charging_Hub": {
+        "tags": [TAG.Collection, TAG.Electric, TAG.Vehicle, TAG.Charging, TAG.Hub],
+        "aliases": [BRICK["EV_Charging_Hub"]],
+        "constraints": {BRICK.hasPart: [BRICK.Electric_Vehicle_Charging_Station]},
     },
 }
